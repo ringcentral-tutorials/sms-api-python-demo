@@ -1,0 +1,228 @@
+.chapter(data-title='SMS Application Walkthrough')
+  .step(data-title='Welcome!', data-file='../README.MD', data-highlight='3-10')
+    h2 Welcome to SMS Application Walk-through
+
+    p This walk-through of an SMS application will show you how to go about building a fully functional SMS application. In this walk-through you will learn:
+
+    ul
+        li How to send an SMS message.
+        li How to send an MMS message
+        li How to track the delivery status of a message.
+        li How to modify the message's read status.
+        li How to delete a message.
+        li How to receive and reply to an SMS message.
+
+    h3 Other Languages
+
+    p This walk-through is also available in the following languages:
+
+    ul
+      li
+        a(href="https://ringcentral-tutorials.github.io/sms-api-php-demo/") PHP
+      li
+        a(href="https://ringcentral-tutorials.github.io/sms-api-csharp-demo/") C#
+      li
+        a(href="https://ringcentral-tutorials.github.io/sms-api-nodejs-demo/") Node JS
+
+  .step(data-title='Setup Your Project', data-file='../.env.sample')
+    :markdown
+      ## Clone and Setup the project
+
+      ```
+      $ git clone https://github.com/ringcentral-tutorials/sms-api-python-demo
+      $ cd sms-api-python-demo
+      $ cp .env.sample .env
+      $ python setup.py install
+      ```
+
+      Specify your app client id and client secret as well as the account login credentials to the constants defined in the .env file.
+
+      ### Important!
+      Your RingCentral app must have the SMS, ReadMessages and EditMessages permissions.
+
+  .step(data-title='Sending an SMS', data-file='../send-sms.py')
+    :markdown
+      ## Sending an SMS message
+
+      Let's create a file named `send-sms.py` as shown on the right-hand side pane.
+
+      It is very convenient to access RingCentral platform using the [RingCentral Python SDK](https://github.com/ringcentral/ringcentral-python).
+
+      First, we import and create an instance `rcsdk` of the RingCentral SDK, passing along the client Id, client secret and the server url read from the `.env` file.
+
+      Next, we get the `platform` object from the `rcsdk.platform()`
+
+      Then, we call the `platform.login()` function to authenticate a user. In this step, we pass the username and password and optionally the extension number.
+
+      After we've logged in successfully, we define the `params` object and specify the `from`, `to` and the `text` message.
+
+      Finally, we call the `platform.post('/account/~/extension/~/sms', params)` method to send the message.
+
+      This code will work right out of the box. So let's try it out. Go to the Terminal window and run `python send-sms.py`.
+
+      You should see the message delivery status output to the screen, and shortly an SMS will arrive on the recipient's phone.
+
+      You have just successfully sent an SMS programmatically from your sandbox to a recipient.
+
+      ### Important
+
+      Bear in mind that you can only send SMS messages from a phone number which belongs to the user who is being authenticated to use the app.
+
+      Pay attention to the `params.to` which is an array. This means that you can specify multiple recipients to send a group message.
+
+  .step(data-title='Sending an MMS', data-file='../send-mms.py' data-highlight='16-29')
+    :markdown
+      ## Send an MMS message
+
+      Let's create a file named `send-mms.py`.
+
+      Similar to the previous step, we need to login before we move on to send a message.
+
+      To create an MMS message, we call the `rcsdk.create_multipart_builder()` function to create a `builder` object and use it to add content attachments to the message.
+
+      First, we define the `body` object, specify the `from`, the `to` and the `text` parameters. Then we add the `body` to the `builder` object.
+
+      Then, we load the image and append the image attachment to the `builder` as shown on the right-hand site pane.
+
+      Next, we call the `builder.request(...)` to create a `request` object.
+
+      Finally, we call the `platform.send_request(request)` method to send the message.
+
+      Let's try it out. Go to the Terminal window and run `python send-mms.py`.
+
+      You should see the message delivery status output to the screen, and shortly an MMS will arrive on the recipient's phone.
+
+      ### RingCentral supported MMS content types
+
+      - Images: jpg/jpeg, png, gif, bmp, tif/tiff, svg
+      - Videos: 3gp, mp4, mpeg, flv, wmv, mov
+      - Audio: mp3
+      - Files: vcf/vcard, zip, rtf, html
+
+      ### Attachment size limit
+
+      The maximum size for MMS is carrier-dependent and normally around 1.2MB to 1.4MB.
+
+      You can send multiple attachments in a single MMS message. But the total size of attachments should not exceed the size limit above!
+
+  .step(data-title='Track the delivery', data-file='../send-mms.py', data-highlight='30-33')
+    :markdown
+      ## Track the delivery status of a message
+
+      It takes some time for the system to send and deliver a message to a recipient. Delivering a message may fail due to networks conditions or the availability of the recipient's phone number as well. The delivery status of a particular message can be tracked using the __message-store__ endpoint.
+
+      Let's add some code to track the delivery status.
+
+      After sending a message, we'll receive the response containing information about the sent message which includes the message `id` and the `messageStatus`. We'll use the message `id` to identify the message we want to track the delivery status.
+
+      We make a while loop and check the `mesasgeStatus` value. If it is equal to "Queued", we cause a second delay then call the `platform.get(...)` method to read and print out the latest delivery status of the message.
+
+      Let's try it out. Uncomment the entire while loop then run `python send-mms.py` again.
+
+  .step(data-title='Change the message read status', data-file='../retrieve-modify.py', data-highlight='16-31')
+    :markdown
+      ### Change the message read status
+
+      Every message has the `readStatus` as "Read" or "Unread". We can retrieve a message metadata from the message store and change the `readStatus` as we want.
+
+      Let's create a file named `retrieve-modify.py`.
+
+      Similar to the previous step, we use the SDK to login with the same user before we move on to the message store.
+
+      To read the metadata of recent messages from the user's message store, we define the `params` object and set the `readStatus` to "Unread" to retrieve only unread messages.
+
+      Then, we call the `platform.get('/account/~/extension/~/message-store', params)` to read the message store.
+
+      We parse the response to get an array of records. We iterate thru the `records` array, read the message id of each message, and use the id to create an endpoint to access that message.
+
+      To change the message `readStatus` to "Read", we set request params `readStatus` to "Read", then call the `platform.put("/account/~/extension/~/message-store/%d" % (record.id), params)` to change the `readStatus` of that message.
+
+      Let's try it out. Go to the Terminal window and run `python retrieve-modify.py`.
+
+      ### Specify other request parameters
+
+      You can set other request parameters such as the `dateFrom` and `dateTo` to retrieve messages created within the specified date and time period. The default date and time period is the current time minus 24 hours.
+
+  .step(data-title='Delete a message', data-file='../retrieve-delete.py', data-highlight='17-28')
+    :markdown
+      ### Delete a message
+
+      Let's create a file named `retrieve-delete.py`.
+
+      Similar to the previous step, we retrieve recent messages using the `readStatus` filter but this time, we read those messages which have the `readStatus` as "Read".
+
+      Then we iterate thru the `records` array, read the message id of each message, and use the id to create an endpoint to access that message, and call the `platform.delete('/account/~/extension/~/message-store/%d" % (messagesId))` to delete the message.
+
+      Let's try it out. Go to the Terminal window and run `python retrieve-delete.py`.
+
+      If you want to delete all the messages from the `records` array, comment out the __break__ line.
+
+.chapter(data-title='Receive - Reply to SMS messages')
+  .step(data-title='Receiving SMS messages', data-file='../receive-reply.py', data-highlight='19-34')
+    :markdown
+      In this step, you will learn how to listen to incoming SMS messages and new voicemail messages, then reply with an SMS message to the sender of that incoming message or incoming call.
+
+      ### Listen to incoming SMS and new voicemail messages
+
+      Let's create a file named `receive-reply.py`.
+
+      Similar to the previous step, we use the SDK to login with the same user before we move on to subscribe for notifications.
+
+      First, we implement the `pubnub` function to handle the subscription for notifications
+
+      We define an `eventFilters` array and add the following filters to the array:
+
+      - "/account/~/extension/~/message-store/instant?type=SMS": for receiving incoming SMS notifications.
+      - "/account/~/extension/~/voicemail": for receiving new voicemail notifications.
+
+      As you can see, we can specify multiple event notifications in a single subscription to get notified for different types of events without the need of creating multiple subscriptions.
+
+      Then, we use the `rcsdk.create_subscription()` method to create the `subscription` object.
+
+      We call the `subscription.add_events()` to set the `eventFilters` and register for the event notifications as shown on the right-hand side pane.
+
+      Next, we call the `subscription.on(Events.notification, on_message)` function, where the `on_message` is a callback function which will be called every time we receive a notification of the event we subscribed for.
+
+      ### Handle other subscription situations
+
+      You can implement the `subscription.on(...)` function with any other event types listed below to handle different subscription situations.
+
+      ```
+      - Events.connectionError
+      - subscription.events.subscribeSuccess
+      - subscription.events.subscribeError
+      - subscription.events.renewSuccess
+      - subscription.events.renewError
+      - subscription.events.removeSuccess
+      - subscription.events.removeError
+      ```
+
+      ### Subscription limitations
+
+      Each account can register up to maximum 20 subscriptions. Therefore, using multiple event notifications in a subscription, when possible, will help to to overcome the limitation.
+
+      Active subscriptions will expire. The `subscription` object created by the SDK will renew the subscription automatically on your behalf as long as your app is still logged in and the platform refresh token is still valid.
+
+      ### PubNub Notification Alternative
+
+      The subscription we created above uses [PubNub](https://www.pubnub.com/).
+
+      There is also a [WebHook way to do subscription](https://developers.ringcentral.com/guide/notifications/quick-start/webhook/nodejs). We won't dive into detail here. You can click the link to read more.
+
+  .step(data-title='Replying with a SMS message', data-file='../receive-reply.py', data-highlight='36-57')
+    :markdown
+      ## Replying with an SMS message
+
+      When there is an incoming SMS message or a new voicemail, we will receive the notification via the `on_message` callback function.
+
+      As we registered for multiple event notifications, we need to detect which event notification was triggered before we take an action on the notification.
+
+      We simply check the `msg['event']` value to see if it contains the name of the event type we've registered for.
+
+      In this tutorial, if it is the "/message-store/instant" or the "/voicemail", we parse the notification body, get the sender's phone number and compose a reply message then send the message to the `senderNumber`.
+
+      Let's try it out. Go to the Terminal window and run `python receive-reply.py`.
+
+      ## Congratulations!
+
+      And that's it. You should have successfully build a number of the components of an SMS application.

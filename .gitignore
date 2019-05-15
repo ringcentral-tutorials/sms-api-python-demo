@@ -1,0 +1,6 @@
+.env
+*.pyc
+dist
+node_modules
+*~
+sms_api_python_quickstart.egg-info
