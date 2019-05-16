@@ -23,9 +23,7 @@ count = len(records)
 print ("We get a list of %d messages" % (count))
 for record in records:
     messageId = record.id
-    params = {
-        'readStatus' : 'Read'
-    }
+    params['readStatus'] =  "Read"
     response = platform.put("/account/~/extension/~/message-store/%d" % (messageId), params);
     readStatus = response.json().readStatus
     print("Message status has been changed to " + readStatus)

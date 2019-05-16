@@ -54,7 +54,7 @@
 
       Then, we call the `platform.login()` function to authenticate a user. In this step, we pass the username and password and optionally the extension number.
 
-      After we've logged in successfully, we define the `params` object and specify the `from`, `to` and the `text` message.
+      After we've logged in successfully, we define the `params` variable and specify the `from`, the `to` and the `text` parameters.
 
       Finally, we call the `platform.post('/account/~/extension/~/sms', params)` method to send the message.
 
@@ -80,7 +80,7 @@
 
       To create an MMS message, we call the `rcsdk.create_multipart_builder()` function to create a `builder` object and use it to add content attachments to the message.
 
-      First, we define the `body` object, specify the `from`, the `to` and the `text` parameters. Then we add the `body` to the `builder` object.
+      First, we define the `body` variable, specify the `from`, the `to` and the `text` parameters. Then we add the `body` to the `builder` object.
 
       Then, we load the image and append the image attachment to the `builder` as shown on the right-hand site pane.
 
@@ -119,7 +119,7 @@
 
       Let's try it out. Uncomment the entire while loop then run `python send-mms.py` again.
 
-  .step(data-title='Change the message read status', data-file='../retrieve-modify.py', data-highlight='16-31')
+  .step(data-title='Change the message read status', data-file='../retrieve-modify.py', data-highlight='16-29')
     :markdown
       ### Change the message read status
 
@@ -127,21 +127,21 @@
 
       Let's create a file named `retrieve-modify.py`.
 
-      Similar to the previous step, we use the SDK to login with the same user before we move on to the message store.
+      Similar to the previous step, we use the SDK to login with the same user before we move on to access the message store.
 
-      To read the metadata of recent messages from the user's message store, we define the `params` object and set the `readStatus` to "Unread" to retrieve only unread messages.
+      To read the metadata of recent messages from the user's message store, we define the `params` variable and set the `readStatus` value to "Unread" to retrieve only unread messages.
 
       Then, we call the `platform.get('/account/~/extension/~/message-store', params)` to read the message store.
 
       We parse the response to get an array of records. We iterate thru the `records` array, read the message id of each message, and use the id to create an endpoint to access that message.
 
-      To change the message `readStatus` to "Read", we set request params `readStatus` to "Read", then call the `platform.put("/account/~/extension/~/message-store/%d" % (record.id), params)` to change the `readStatus` of that message.
+      To change the message `readStatus` value to "Read", we set the `params['readStatus']` value to "Read", then call the `platform.put("/account/~/extension/~/message-store/%d" % (record.id), params)` to change the `readStatus` of that message.
 
       Let's try it out. Go to the Terminal window and run `python retrieve-modify.py`.
 
       ### Specify other request parameters
 
-      You can set other request parameters such as the `dateFrom` and `dateTo` to retrieve messages created within the specified date and time period. The default date and time period is the current time minus 24 hours.
+      You can set other query parameters such as the `dateFrom` and `dateTo` to retrieve messages created within the specified date and time period. The default date and time period is the current time minus 24 hours.
 
   .step(data-title='Delete a message', data-file='../retrieve-delete.py', data-highlight='17-28')
     :markdown
