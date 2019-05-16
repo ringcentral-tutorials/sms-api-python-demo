@@ -57,17 +57,17 @@ $ python setup.py install
 <p>After sending a message, we&#39;ll receive the response containing information about the sent message which includes the message <code>id</code> and the <code>messageStatus</code>. We&#39;ll use the message <code>id</code> to identify the message we want to track the delivery status.</p>
 <p>We make a while loop and check the <code>mesasgeStatus</code> value. If it is equal to &quot;Queued&quot;, we cause a second delay then call the <code>platform.get(...)</code> method to read and print out the latest delivery status of the message.</p>
 <p>Let&#39;s try it out. Uncomment the entire while loop then run <code>python send-mms.py</code> again.</p>
-</div><div data-title="Change the message read status" data-file="../retrieve-modify.py" data-highlight="16-31" class="step"><h3 id="change-the-message-read-status">Change the message read status</h3>
+</div><div data-title="Change the message read status" data-file="../retrieve-modify.py" data-highlight="16-29" class="step"><h3 id="change-the-message-read-status">Change the message read status</h3>
 <p>Every message has the <code>readStatus</code> as &quot;Read&quot; or &quot;Unread&quot;. We can retrieve a message metadata from the message store and change the <code>readStatus</code> as we want.</p>
 <p>Let&#39;s create a file named <code>retrieve-modify.py</code>.</p>
 <p>Similar to the previous step, we use the SDK to login with the same user before we move on to access the message store.</p>
 <p>To read the metadata of recent messages from the user&#39;s message store, we define the <code>params</code> variable and set the <code>readStatus</code> value to &quot;Unread&quot; to retrieve only unread messages.</p>
 <p>Then, we call the <code>platform.get(&#39;/account/~/extension/~/message-store&#39;, params)</code> to read the message store.</p>
 <p>We parse the response to get an array of records. We iterate thru the <code>records</code> array, read the message id of each message, and use the id to create an endpoint to access that message.</p>
-<p>To change the message <code>readStatus</code> value to &quot;Read&quot;, we set the <code>params.readStatus</code> value to &quot;Read&quot;, then call the <code>platform.put(&quot;/account/~/extension/~/message-store/%d&quot; % (record.id), params)</code> to change the <code>readStatus</code> of that message.</p>
+<p>To change the message <code>readStatus</code> value to &quot;Read&quot;, we set the <code>params[&#39;readStatus&#39;]</code> value to &quot;Read&quot;, then call the <code>platform.put(&quot;/account/~/extension/~/message-store/%d&quot; % (record.id), params)</code> to change the <code>readStatus</code> of that message.</p>
 <p>Let&#39;s try it out. Go to the Terminal window and run <code>python retrieve-modify.py</code>.</p>
 <h3 id="specify-other-request-parameters">Specify other request parameters</h3>
-<p>You can set other request parameters such as the <code>dateFrom</code> and <code>dateTo</code> to retrieve messages created within the specified date and time period. The default date and time period is the current time minus 24 hours.</p>
+<p>You can set other query parameters such as the <code>dateFrom</code> and <code>dateTo</code> to retrieve messages created within the specified date and time period. The default date and time period is the current time minus 24 hours.</p>
 </div><div data-title="Delete a message" data-file="../retrieve-delete.py" data-highlight="17-28" class="step"><h3 id="delete-a-message">Delete a message</h3>
 <p>Let&#39;s create a file named <code>retrieve-delete.py</code>.</p>
 <p>Similar to the previous step, we retrieve recent messages using the <code>readStatus</code> filter but this time, we read those messages which have the <code>readStatus</code> as &quot;Read&quot;.</p>
@@ -98,11 +98,11 @@ $ python setup.py install
 - subscription.events.removeSuccess
 - subscription.events.removeError
 </code></pre><h3 id="subscription-limitations">Subscription limitations</h3>
-<p>Each account can register up to maximum 20 subscriptions. Therefore, using multiple event notifications in a subscription, when possible, will help to to overcome the limitation.</p>
+<p>Each account can register up to maximum 20 subscriptions. Therefore, using multiple event notifications in a subscription, when possible, will help overcome the limitation.</p>
 <p>Active subscriptions will expire. The <code>subscription</code> object created by the SDK will renew the subscription automatically on your behalf as long as your app is still logged in and the platform refresh token is still valid.</p>
 <h3 id="pubnub-notification-alternative">PubNub Notification Alternative</h3>
 <p>The subscription we created above uses <a href="https://www.pubnub.com/">PubNub</a>.</p>
-<p>There is also a <a href="https://developers.ringcentral.com/guide/notifications/quick-start/webhook/nodejs">WebHook way to do subscription</a>. We won&#39;t dive into detail here. You can click the link to read more.</p>
+<p>There is also a <a href="https://developers.ringcentral.com/guide/notifications/quick-start/webhook/python">WebHook way to do subscription</a>. We won&#39;t dive into detail here. You can click the link to read more.</p>
 </div><div data-title="Replying with a SMS message" data-file="../receive-reply.py" data-highlight="36-57" class="step"><h2 id="replying-with-an-sms-message">Replying with an SMS message</h2>
 <p>When there is an incoming SMS message or a new voicemail, we will receive the notification via the <code>on_message</code> callback function.</p>
 <p>As we registered for multiple event notifications, we need to detect which event notification was triggered before we take an action on the notification.</p>
