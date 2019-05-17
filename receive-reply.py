@@ -52,7 +52,7 @@ def on_message(msg):
                 'to': [{'phoneNumber': senderNumber}],
                 'text' : 'This is an automatic reply. Thank you for your voice message! I will get back to you asap.'
             })
-            print('Replied message sent. Message delivery status: ' + response.json().messageStatus)
+            print("Replied message sent. Message delivery status: " + response.json().messageStatus)
     else:
         print ("Not an event we are waiting for.")
 
